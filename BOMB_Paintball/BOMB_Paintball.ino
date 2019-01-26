@@ -4,7 +4,13 @@
 bool ledState = 0;
 long prevMillis = 0;
 long led_delay = 250;
-
+char key;
+unsigned long currentMillis =0;
+unsigned long startMillis = 0;
+int period = 1000;
+int temps = 0;
+ int minu;
+ int sec;
 const byte ROWS = 4; //nombre de lignes
 const byte COLS = 3; //nombre de colonnes
 
@@ -27,6 +33,21 @@ int redPin = 24;
 int greenPin = 25;
 int bluePin = 22;
 
+void actualisationTemps(){
+         tone(53, 3000);
+         lcd.setCursor(6,1);
+         lcd.print(minu);
+         lcd.print(" : ");
+         lcd.print(sec);                          // affiche le temps 
+         setColor(255,0,0);
+         noTone(53);
+         sec--;
+         if(sec == 0){
+          minu--;
+          sec = 59;
+         }
+         key = keypad.getKey();
+}
 
 void setup()
 {
@@ -45,12 +66,10 @@ void setup()
 void loop()
 {
  
- char key = keypad.getKey();
+ key = keypad.getKey();
 
  
- 
- 
- 
+
  int r=0;
  int g=0;
  int b=0;
@@ -60,9 +79,8 @@ void loop()
  int pu2 = 10;
  int nbr_sai = 0;
  int nbr;
- int temps = 0;
- int minu;
- int sec;
+ 
+
  int Vf;
  int pu3 = 1000;
  int t;
@@ -127,7 +145,9 @@ while(key != '#'){
             
              nbr=nbr-48;
              nbr=nbr*pu2;
-             temps = nbr + temps;
+             temps = nbr+temps;
+             minu = temps-1;
+             sec = 59;
              lcd.clear();
              lcd.print(temps);
              pu2 = pu2/10;
@@ -144,29 +164,14 @@ while(key != '#'){
 
             
 
+      currentMillis = millis();
+      startMillis = millis();
+      actualisationTemps(); //intialisation pour calcul millis
 
-  for (minu = temps-1 ; minu >= 0 ; minu --)
-    {
       
-      for (sec = 59 ; sec !=0 ; sec --)
-      {
-        
-        if(key != '*')
-        {
-      
-         tone(53, 3000);
-         lcd.setCursor(6,1);
-         lcd.print(minu);
-         lcd.print(" : ");
-         lcd.print(sec);                          // affiche le temps 
-         setColor(255,0,0);
-         delay(500);
-         noTone(53);
-         delay(500);
-         key = keypad.getKey();
-
-        }
-        else 
+      while(1){
+       currentMillis = millis();
+       if(key == '*')
         {
 
               lcd.clear();
@@ -230,11 +235,16 @@ while(key != '#'){
                lcd.clear();
                pu3=1000;
                Vf=0; 
-               key = ' ';       
+               key = ' '; 
              }  
         }
+        if(currentMillis - startMillis >= period){
+          actualisationTemps();
+          startMillis = currentMillis;
+        }
+        
+        
       }
-    }
                 
       
 ////////////////////////////////////////////////////////////////////////////////////////////
